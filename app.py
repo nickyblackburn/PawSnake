@@ -8,7 +8,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret'
 socketio = SocketIO(app, cors_allowed_origins="*")
-tick_hz = 10  # game ticks per second
+tick_hz = 5 # game ticks per second
 state_lock = Lock()
 
 # --- Game model ---
@@ -107,6 +107,15 @@ class Room:
                 cells.discard(c)
         return cells
 
+    
+    def reset(self):
+        self.snakes.clear()
+        self.tags.clear()
+        self.food = (GRID_W//2, GRID_H//2)
+        self.winner = None
+        self.pending_dirs.clear()
+        self.running = False
+
 rooms = {}  # room_id -> Room
 
 # --- Routes ---
@@ -138,26 +147,6 @@ def on_create(data):
     emit('room_joined', {'room': room_id, 'as': 'p1', 'mode': mode})
     socketio.start_background_task(game_loop, room_id)
 
-@socketio.on('join_room')
-def on_join(data):
-    room_id = data.get('room')
-    with state_lock:
-        r = rooms.get(room_id)
-        if not r:
-            emit('error', {'message':'Room not found'})
-            return
-        if r.mode == 'pvp' and 'p2' in r.tags:
-            emit('error', {'message':'Room full'})
-            return
-    join_room(room_id)
-    with state_lock:
-        tag = 'p2' if 'p2' not in r.tags else None
-        if tag is None:
-            emit('error', {'message':'Room already has two players'})
-            return
-        r.tags[tag] = request.sid
-        r.snakes[request.sid] = spawn_snake('right')
-    emit('room_joined', {'room': room_id, 'as': tag, 'mode': r.mode}, room=room_id)
 
 @socketio.on('set_dir')
 def on_dir(data):
@@ -256,6 +245,35 @@ def game_loop(room_id):
                 return
         socketio.sleep(1.0/tick_hz)
 
+@socketio.on('restart')
+def on_restart(data):
+    room_id = data.get('room')
+    with state_lock:
+        r = rooms.get(room_id)
+        if not r:
+            emit('error', {'message':'Room not found'})
+            return
+        # preserve mode and whoever is still connected
+        mode = r.mode
+        tags = dict(r.tags)
+        r.reset()
+        r.mode = mode
+        r.tags = tags
+        # respawn present players/AI
+        if 'p1' in r.tags:
+            r.snakes[r.tags['p1']] = spawn_snake('left')
+        if mode == 'ai':
+            r.tags['p2'] = '_ai'
+            r.snakes['_ai'] = spawn_snake('right')
+        elif 'p2' in r.tags:
+            r.snakes[r.tags['p2']] = spawn_snake('right')
+        r.food = new_food(r.occupied_cells())
+        if not r.running:
+            r.running = True
+            socketio.start_background_task(game_loop, room_id)
+    emit('restarted', {'room': room_id}, room=room_id)
+
+
 @socketio.on('disconnect')
 def on_disconnect():
     # remove player from any rooms
@@ -272,4 +290,4 @@ def on_disconnect():
 
 if __name__ == '__main__':
     print("Starting Flask-SocketIO Snake on http://127.0.0.1:5000")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=1234, debug=True)
