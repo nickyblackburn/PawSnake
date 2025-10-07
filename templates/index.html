@@ -3,43 +3,44 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Snake: AI or PvP</title>
+    <title>Snake Arena</title>
     <style>
-    .confetti-overlay.hide {
-        opacity: 0;
-        transition: opacity 1s ease-out;
-      }
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; background:#0f1220; color:#e9ecf1; display:flex; gap:24px; padding:20px; }
-      .panel { background:#171a2b; border:1px solid #2a2e45; border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+             background:#0f1220; color:#e9ecf1; display:flex; gap:24px; padding:20px; }
+      .panel { background:#171a2b; border:1px solid #2a2e45; border-radius:16px; padding:16px;
+               box-shadow:0 10px 30px rgba(0,0,0,0.4); }
       #game { display:flex; flex-direction:column; align-items:center; gap:8px; }
       canvas { background:#0a0d1a; border:1px solid #2a2e45; border-radius:12px; image-rendering: pixelated; }
-      .controls { display:flex; gap:12px; flex-wrap:wrap; }
-      input, button { background:#232744; color:#e9ecf1; border:1px solid #2f3558; padding:8px 12px; border-radius:10px; }
+      input, button, select { background:#232744; color:#e9ecf1; border:1px solid #2f3558; padding:8px 12px; border-radius:10px; }
       button:hover { filter:brightness(1.1) }
-      .badge { font-size:12px; padding:2px 8px; background:#2a2e45; border-radius:999px; }
-      .row { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
-      .subtitle { opacity:0.75 }
+      .controls { display:flex; gap:12px; flex-wrap:wrap; }
       .legend { display:flex; gap:12px; }
-      .legend span { display:inline-flex; align-items:center; gap:6px; }
       .dot { width:12px; height:12px; border-radius:2px; display:inline-block; }
       .msg { min-height: 1.5em; }
+      .confetti-overlay { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 30; background: transparent; }
+      .modal.hidden { display:none; }
+      .modal { position: fixed; inset:0; display:grid; place-items:center; background: rgba(0,0,0,0.35); z-index: 40; }
+      .modal-card { min-width: 280px; max-width: 420px; background: #171a2b; color: #e9ecf1;
+                    border:1px solid #2a2e45; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.6);
+                    padding:18px 20px; text-align:center; }
+      .modal-card h3 { margin:0 0 8px; font-size:20px; }
+      .result-text { font-size:22px; margin:6px 0 16px; }
+      .modal-actions { display:flex; gap:10px; justify-content:center; }
+      .modal-actions button { background:#232744; color:#e9ecf1; border:1px solid #2f3558; padding:8px 14px; border-radius:10px; cursor:pointer; }
+      .modal-actions button:hover { filter:brightness(1.1); }
+      .modal-actions .ghost { background: transparent; }
     </style>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   </head>
   <body>
     <div class="panel" id="config">
-      <h2>🐾 Snake Arena</h2>
-      <div class="subtitle">Play vs a sneaky AI or invite a friend to your room.</div>
-      <div class="row">
+      <h2>🐍 Snake Arena</h2>
+      <div class="controls">
         <label>Mode:</label>
-        <select id="mode">
-          <option value="ai">vs AI</option>
-          <option value="pvp">Player vs Player</option>
-        </select>
-      </div>
-      <div class="row">
+        <select id="mode"><option value="ai">vs AI</option><option value="pvp">Player vs Player</option></select>
         <label>Room:</label>
-        <input id="room" placeholder="(auto if blank)" />
+        <input id="room" placeholder="(auto)" />
       </div>
       <div class="controls">
         <button id="create">Create Room</button>
@@ -47,10 +48,6 @@
         <button id="copy">Copy Room Link</button>
       </div>
       <div class="msg" id="status"></div>
-      <div class="legend">
-        <span><b>Controls:</b> Arrow keys / WASD</span>
-      </div>
-      <p class="subtitle">Share the room code with your friend for PvP. If vs AI, it starts immediately.</p>
     </div>
 
     <div class="panel" id="game">
@@ -62,8 +59,19 @@
       </div>
       <div id="over" class="msg"></div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <canvas id="confetti" class="confetti-overlay"></canvas>
+    <div id="resultModal" class="modal hidden">
+      <div class="modal-card">
+        <h3 id="resultTitle">Result</h3>
+        <p id="resultText" class="result-text">YOU WIN!</p>
+        <div class="modal-actions">
+          <button id="restartBtn">Restart</button>
+          <button id="closeBtn" class="ghost">Close</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/static/game.js"></script>
-    
   </body>
 </html>

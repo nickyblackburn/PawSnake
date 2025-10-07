@@ -6,4 +6,6 @@
   pointer-events: none;
   z-index: 9999; /* stays above UI but transparent */
   opacity: 1;
+  background: transparent;
+  mix-blend-mode: normal;
 }
