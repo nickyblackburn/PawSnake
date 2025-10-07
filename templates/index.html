@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Snake: AI or PvP</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; background:#0f1220; color:#e9ecf1; display:flex; gap:24px; padding:20px; }
+      .panel { background:#171a2b; border:1px solid #2a2e45; border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+      #game { display:flex; flex-direction:column; align-items:center; gap:8px; }
+      canvas { background:#0a0d1a; border:1px solid #2a2e45; border-radius:12px; image-rendering: pixelated; }
+      .controls { display:flex; gap:12px; flex-wrap:wrap; }
+      input, button { background:#232744; color:#e9ecf1; border:1px solid #2f3558; padding:8px 12px; border-radius:10px; }
+      button:hover { filter:brightness(1.1) }
+      .badge { font-size:12px; padding:2px 8px; background:#2a2e45; border-radius:999px; }
+      .row { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
+      .subtitle { opacity:0.75 }
+      .legend { display:flex; gap:12px; }
+      .legend span { display:inline-flex; align-items:center; gap:6px; }
+      .dot { width:12px; height:12px; border-radius:2px; display:inline-block; }
+      .msg { min-height: 1.5em; }
+    </style>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="panel" id="config">
+      <h2>🐾 Snake Arena</h2>
+      <div class="subtitle">Play vs a sneaky AI or invite a friend to your room.</div>
+      <div class="row">
+        <label>Mode:</label>
+        <select id="mode">
+          <option value="ai">vs AI</option>
+          <option value="pvp">Player vs Player</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Room:</label>
+        <input id="room" placeholder="(auto if blank)" />
+      </div>
+      <div class="controls">
+        <button id="create">Create Room</button>
+        <button id="join">Join Room</button>
+        <button id="copy">Copy Room Link</button>
+      </div>
+      <div class="msg" id="status"></div>
+      <div class="legend">
+        <span><b>Controls:</b> Arrow keys / WASD</span>
+      </div>
+      <p class="subtitle">Share the room code with your friend for PvP. If vs AI, it starts immediately.</p>
+    </div>
+
+    <div class="panel" id="game">
+      <canvas id="c" width="900" height="600"></canvas>
+      <div class="legend">
+        <span><span class="dot" style="background:#8be9fd"></span>P1</span>
+        <span><span class="dot" style="background:#ff79c6"></span>P2 / AI</span>
+        <span><span class="dot" style="background:#50fa7b"></span>Food</span>
+      </div>
+      <div id="over" class="msg"></div>
+    </div>
+
+    <script src="/static/game.js"></script>
+  </body>
+</html>
