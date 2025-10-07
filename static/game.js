@@ -180,10 +180,10 @@
     if (w === 'draw') msg = 'Draw! No survivors 💥';
     else if (tag && w.toLowerCase() === tag.toLowerCase()) {
       msg = 'YOU WIN! 🎉';
-      celebrate(2000);
+      celebrate(20);
     } else msg = 'You lose… try again 🥺';
     over.textContent = msg;
-    celebrate(2000);
+    celebrate(20);
     setStatus(`Game over — ${msg}`);
     playAgainBtn.style.display = 'inline-block';
   });
