@@ -29,8 +29,8 @@
   function confettiWin(){
     const end=Date.now()+2500;
     (function frame(){
-      confettiCannon({particleCount:100,angle:60,spread:55,startVelocity:45,origin:{x:0,y:0.6}});
-      confettiCannon({particleCount:100,angle:120,spread:55,startVelocity:45,origin:{x:1,y:0.6}});
+      confettiCannon({particleCount:10,angle:60,spread:55,startVelocity:45,origin:{x:0,y:0.6}});
+      confettiCannon({particleCount:10,angle:120,spread:55,startVelocity:45,origin:{x:1,y:0.6}});
       if(Date.now()<end)requestAnimationFrame(frame);
     })();
   }
